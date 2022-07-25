@@ -18,7 +18,7 @@ import random
 logging.basicConfig(level=logging.INFO, format="[%(module)s] %(message)s")
 
 # Constants for now
-SELECT_LIVE_IP = 'xxx.xxx.xxx.xxx'
+SELECT_LIVE_IP = 'x.x.x.x'
 SYSTEM_ID = 'xxxxx'
 
 class BatterySOC(Accessory):
@@ -26,8 +26,8 @@ class BatterySOC(Accessory):
 
 	category = CATEGORY_SENSOR  # This is for the icon in the iOS Home app.
 
-	# def __init__(self, *args, house_load_instance=None, generator_status_instance=None, **kwargs):
-	def __init__(self, *args, generator_status_instance=None, **kwargs):
+	def __init__(self, *args, house_load_instance=None, generator_status_instance=None, **kwargs):
+	# def __init__(self, *args, generator_status_instance=None, **kwargs):
 		"""Here, we just store a reference to the current state-of-charge characteristic and
 		   add a method that will be executed every time its value changes.
 		"""
@@ -36,15 +36,15 @@ class BatterySOC(Accessory):
 
 		self.select_data_url = f'http://{SELECT_LIVE_IP}/cgi-bin/solarmonweb/devices/{SYSTEM_ID}/point'
 		# add the house load class instance
-		# self.house_load_instance = house_load_instance
+		self.house_load_instance = house_load_instance
 		# add the generator status class instance
 		self.generator_status_instance = generator_status_instance
 		# Add the services that this Accessory will support with add_preload_service here
 		battery_soc = self.add_preload_service('HumiditySensor')
 		battery_service = self.add_preload_service('BatteryService')
 		self.battery_soc_char = battery_soc.configure_char('CurrentRelativeHumidity')
-		# self.battery_soc_active_char = battery_soc.configure_char('StatusActive')
-		# self.battery_soc_fault_char = battery_soc.configure_char('StatusFault')
+		self.battery_soc_active_char = battery_soc.configure_char('StatusActive')
+		self.battery_soc_fault_char = battery_soc.configure_char('StatusFault')
 		self.battery_service_battery_level_char = battery_service.configure_char('BatteryLevel')
 		self.battery_service_charging_state_char = battery_service.configure_char('ChargingState', value = int(0))
 		self.battery_service_status_low_battery_char = battery_service.configure_char('StatusLowBattery', value = int(0))
@@ -74,7 +74,8 @@ class BatterySOC(Accessory):
 				bat_soc = float(hfdict["items"]["battery_soc"])
 				bat_w = float(hfdict["items"]["battery_w"])
 				grid_w = float(hfdict["items"]["grid_w"])
-				# print(bat_soc, bat_w, grid_w)
+				load_w = float(hfdict["items"]["load_w"])
+				# set battery SOC values
 				self.battery_soc_char.set_value(bat_soc)
 				self.battery_service_battery_level_char.set_value(int(bat_soc))
 				if bat_soc < 40.0:
@@ -87,22 +88,38 @@ class BatterySOC(Accessory):
 					charging_state = int(0)
 				self.battery_service_charging_state_char.set_value(charging_state)
 				self.battery_service_status_low_battery_char.set_value(bat_low)
+				# set load value
+				self.house_load_instance.current_house_load = load_w
+				# set generator status
 				if grid_w < -10.0:
 					self.generator_status_instance.current_generator_status = True
 				else:
 					self.generator_status_instance.current_generator_status = False
-				# self.battery_soc_active_char.set_value(True)
-				# self.battery_soc_fault_char.set_value(int(0))
+				self.battery_soc_active_char.set_value(True)
+				self.battery_soc_fault_char.set_value(int(0))
+				self.generator_status_instance.current_generator_status_active = True
+				self.generator_status_instance.current_generator_status_fault = int(0)
+				self.house_load_instance.house_load_sensor_active = True
+				self.house_load_instance.house_load_sensor_fault = int(0)
 			else:
 				print(hfdata.status_code)
 				self.battery_service_charging_state_char.set_value(int(2))
-				# self.battery_soc_active_char.set_value(False)
-				# self.battery_soc_fault_char.set_value(int(1))
+				self.battery_soc_active_char.set_value(False)
+				self.battery_soc_fault_char.set_value(int(1))
+				self.house_load_instance.current_house_load = 0
+				self.generator_status_instance.current_generator_status_active = False
+				self.generator_status_instance.current_generator_status_fault = int(1)
+				self.house_load_instance.house_load_sensor_active = False
+				self.house_load_instance.house_load_sensor_fault = int(1)
 		except BaseException as err:
 			print(f"Unexpected {err=}, {type(err)=}")
 			self.battery_service_charging_state_char.set_value(int(2))
-			# self.battery_soc_active_char.set_value(False)
-			# self.battery_soc_fault_char.set_value(int(1))
+			self.battery_soc_active_char.set_value(False)
+			self.battery_soc_fault_char.set_value(int(1))
+			self.generator_status_instance.current_generator_status_active = False
+			self.generator_status_instance.current_generator_status_fault = int(1)
+			self.house_load_instance.house_load_sensor_active = False
+			self.house_load_instance.house_load_sensor_fault = int(1)
 			pass
 
 	# The `stop` method can be `async` as well
@@ -120,8 +137,12 @@ class GeneratorStatus(Accessory):
 	def __init__(self,  *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.current_generator_status = False # stores current state
+		self.current_generator_status_active = False 
+		self.current_generator_status_fault = int(1)
 		generator_status_sensor = self.add_preload_service('MotionSensor')
 		self.generator_status_sensor_char = generator_status_sensor.configure_char('MotionDetected', setter_callback=self.set_gen_status)
+		self.generator_status_sensor_active_char = generator_status_sensor.configure_char('StatusActive')
+		self.generator_status_sensor_fault_char = generator_status_sensor.configure_char('StatusFault')
 
 	def set_gen_status(self, value):
 		logging.info("Generator status sensor: %s", value)
@@ -130,6 +151,8 @@ class GeneratorStatus(Accessory):
 	async def run(self):
 		# print(self.current_generator_status)
 		self.generator_status_sensor_char.set_value(self.current_generator_status)
+		self.generator_status_sensor_active_char.set_value(self.current_generator_status_active)
+		self.generator_status_sensor_fault_char.set_value(self.current_generator_status_fault)
 
 class HouseLoad(Accessory):
 	"""House load in watts"""
@@ -139,13 +162,28 @@ class HouseLoad(Accessory):
 	def __init__(self,  *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.current_house_load = 0 # stores current state
+		self.peak_house_load = 0 # stores peak load since starting bridge
+		self.house_load_sensor_active = False
+		self.house_load_sensor_fault = int(1)
 		house_load_sensor = self.add_preload_service('CarbonDioxideSensor')
 		self.house_load_sensor_char = house_load_sensor.configure_char('CarbonDioxideDetected', value = int(0))
-		self.house_load_watts_sensor_char = house_load_sensor.configure_char('CarbonDioxidePeakLevel')
+		self.house_load_watts_sensor_char = house_load_sensor.configure_char('CarbonDioxideLevel')
+		self.house_load_peak_watts_sensor_char = house_load_sensor.configure_char('CarbonDioxidePeakLevel')
+		self.house_load_sensor_active_char = house_load_sensor.configure_char('StatusActive')
+		self.house_load_sensor_fault_char = house_load_sensor.configure_char('StatusFault')
 
 	@Accessory.run_at_interval(30)
 	async def run(self):
+		if self.current_house_load < 1.0:
+			self.house_load_sensor_char.set_value(int(1))
+		else:
+			self.house_load_sensor_char.set_value(int(0))
 		self.house_load_watts_sensor_char.set_value(self.current_house_load)
+		if self.current_house_load > self.peak_house_load:
+			self.peak_house_load = self.current_house_load
+		self.house_load_peak_watts_sensor_char.set_value(self.peak_house_load)
+		self.house_load_sensor_active_char.set_value(self.house_load_sensor_active)
+		self.house_load_sensor_fault_char.set_value(self.house_load_sensor_fault)
 
 def get_accessory(driver):
 	"""Call this method to get a standalone Accessory."""
@@ -153,10 +191,11 @@ def get_accessory(driver):
 
 def get_bridge(driver):
 	bridge = Bridge(driver, 'SelectronicBridge')
-	# house_load_instance = HouseLoad(driver, 'House load in watts')
+	house_load_instance = HouseLoad(driver, 'Load in watts')
 	generator_status_instance = GeneratorStatus(driver, 'Generator status')
-	# bridge.add_accessory(BatterySOC(driver, 'Battery SOC', house_load_instance=house_load_instance, generator_status_instance=generator_status_instance))
-	bridge.add_accessory(BatterySOC(driver, 'Battery SOC', generator_status_instance=generator_status_instance))
+	bridge.add_accessory(BatterySOC(driver, 'House', house_load_instance=house_load_instance, generator_status_instance=generator_status_instance))
+	# bridge.add_accessory(BatterySOC(driver, 'Battery SOC', generator_status_instance=generator_status_instance))
+	bridge.add_accessory(house_load_instance)
 	bridge.add_accessory(generator_status_instance)
 	return bridge
 
