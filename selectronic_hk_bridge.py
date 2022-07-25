@@ -17,11 +17,16 @@ import random
 
 logging.basicConfig(level=logging.INFO, format="[%(module)s] %(message)s")
 
+# Constants for now
+SELECT_LIVE_IP = 'xxx.xxx.xxx.xxx'
+SYSTEM_ID = 'xxxxx'
+
 class BatterySOC(Accessory):
 	"""Implementation of a Selectronic SP PRO 2i battery state-of-charge sensor accessory."""
 
 	category = CATEGORY_SENSOR  # This is for the icon in the iOS Home app.
 
+	# def __init__(self, *args, house_load_instance=None, generator_status_instance=None, **kwargs):
 	def __init__(self, *args, generator_status_instance=None, **kwargs):
 		"""Here, we just store a reference to the current state-of-charge characteristic and
 		   add a method that will be executed every time its value changes.
@@ -29,12 +34,17 @@ class BatterySOC(Accessory):
 		# If overriding this method, be sure to call the super's implementation first.
 		super().__init__(*args, **kwargs)
 
+		self.select_data_url = f'http://{SELECT_LIVE_IP}/cgi-bin/solarmonweb/devices/{SYSTEM_ID}/point'
+		# add the house load class instance
+		# self.house_load_instance = house_load_instance
 		# add the generator status class instance
 		self.generator_status_instance = generator_status_instance
 		# Add the services that this Accessory will support with add_preload_service here
 		battery_soc = self.add_preload_service('HumiditySensor')
 		battery_service = self.add_preload_service('BatteryService')
 		self.battery_soc_char = battery_soc.configure_char('CurrentRelativeHumidity')
+		# self.battery_soc_active_char = battery_soc.configure_char('StatusActive')
+		# self.battery_soc_fault_char = battery_soc.configure_char('StatusFault')
 		self.battery_service_battery_level_char = battery_service.configure_char('BatteryLevel')
 		self.battery_service_charging_state_char = battery_service.configure_char('ChargingState', value = int(0))
 		self.battery_service_status_low_battery_char = battery_service.configure_char('StatusLowBattery', value = int(0))
@@ -55,46 +65,44 @@ class BatterySOC(Accessory):
 		"""We override this method to implement what the accessory will do when it isstarted.
 		   We retrieve the battery SOC from select.live every minute.
 		"""
-		auth_data={'email': 'xxxx', 'pwd': 'xxxx'}
-		url = "https://select.live/login"
-		sess = requests.Session()
 		try:
-			login = sess.post(url, data=auth_data)
-			if login.status_code == 200:
-				hfdata = sess.get('https://select.live/dashboard/hfdata/xxxx')
-				if hfdata.status_code == 200:
-					hfdict = json.loads(hfdata.text)
-					# print(hfdict)
-					bat_soc = float(hfdict["items"]["battery_soc"])
-					bat_w = float(hfdict["items"]["battery_w"])
-					grid_w = float(hfdict["items"]["grid_w"])
-					# print(bat_soc, bat_w, grid_w)
-					self.battery_soc_char.set_value(bat_soc)
-					self.battery_service_battery_level_char.set_value(int(bat_soc))
-					if bat_soc < 40.0:
-						bat_low = int(1)
-					else:
-						bat_low = int(0)
-					if bat_w < 0:
-						charging_state = int(1)
-					else:
-						charging_state = int(0)
-					self.battery_service_charging_state_char.set_value(charging_state)
-					self.battery_service_status_low_battery_char.set_value(bat_low)
-					if grid_w < -10.0:
-						self.generator_status_instance.current_generator_status = True
-					else:
-						self.generator_status_instance.current_generator_status = False
+			sess = requests.Session()
+			hfdata = sess.get(self.select_data_url)
+			if hfdata.status_code == 200:
+				hfdict = json.loads(hfdata.text)
+				# print(hfdict)
+				bat_soc = float(hfdict["items"]["battery_soc"])
+				bat_w = float(hfdict["items"]["battery_w"])
+				grid_w = float(hfdict["items"]["grid_w"])
+				# print(bat_soc, bat_w, grid_w)
+				self.battery_soc_char.set_value(bat_soc)
+				self.battery_service_battery_level_char.set_value(int(bat_soc))
+				if bat_soc < 40.0:
+					bat_low = int(1)
 				else:
-					print(hfdata.status_code)
-					self.battery_service_charging_state_char.set_value(int(2))
+					bat_low = int(0)
+				if bat_w < 0:
+					charging_state = int(1)
+				else:
+					charging_state = int(0)
+				self.battery_service_charging_state_char.set_value(charging_state)
+				self.battery_service_status_low_battery_char.set_value(bat_low)
+				if grid_w < -10.0:
+					self.generator_status_instance.current_generator_status = True
+				else:
+					self.generator_status_instance.current_generator_status = False
+				# self.battery_soc_active_char.set_value(True)
+				# self.battery_soc_fault_char.set_value(int(0))
 			else:
-				print(login.status_code)
+				print(hfdata.status_code)
 				self.battery_service_charging_state_char.set_value(int(2))
+				# self.battery_soc_active_char.set_value(False)
+				# self.battery_soc_fault_char.set_value(int(1))
 		except BaseException as err:
 			print(f"Unexpected {err=}, {type(err)=}")
-			# self.battery_soc_fault_char.set_value(int(1))
 			self.battery_service_charging_state_char.set_value(int(2))
+			# self.battery_soc_active_char.set_value(False)
+			# self.battery_soc_fault_char.set_value(int(1))
 			pass
 
 	# The `stop` method can be `async` as well
@@ -123,13 +131,31 @@ class GeneratorStatus(Accessory):
 		# print(self.current_generator_status)
 		self.generator_status_sensor_char.set_value(self.current_generator_status)
 
+class HouseLoad(Accessory):
+	"""House load in watts"""
+
+	category = CATEGORY_SENSOR
+
+	def __init__(self,  *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.current_house_load = 0 # stores current state
+		house_load_sensor = self.add_preload_service('CarbonDioxideSensor')
+		self.house_load_sensor_char = house_load_sensor.configure_char('CarbonDioxideDetected', value = int(0))
+		self.house_load_watts_sensor_char = house_load_sensor.configure_char('CarbonDioxidePeakLevel')
+
+	@Accessory.run_at_interval(30)
+	async def run(self):
+		self.house_load_watts_sensor_char.set_value(self.current_house_load)
+
 def get_accessory(driver):
 	"""Call this method to get a standalone Accessory."""
 	return BatterySOC(driver, 'BatterySOC')
 
 def get_bridge(driver):
 	bridge = Bridge(driver, 'SelectronicBridge')
+	# house_load_instance = HouseLoad(driver, 'House load in watts')
 	generator_status_instance = GeneratorStatus(driver, 'Generator status')
+	# bridge.add_accessory(BatterySOC(driver, 'Battery SOC', house_load_instance=house_load_instance, generator_status_instance=generator_status_instance))
 	bridge.add_accessory(BatterySOC(driver, 'Battery SOC', generator_status_instance=generator_status_instance))
 	bridge.add_accessory(generator_status_instance)
 	return bridge
@@ -146,6 +172,13 @@ signal.signal(signal.SIGTERM, driver.signal_handler)
 
 # Start it!
 driver.start()
+
+'''
+If you're on the lan and you know the select.live device's IP,
+ you can navigate to http://$ip/cgi-bin/solarmonweb/devices to get
+ the SP Pro's internal device ID and 
+then http://$ip/cgi-bin/solarmonweb/devices/$sp_pro_id/point to get some
+'''
 
 """
 
