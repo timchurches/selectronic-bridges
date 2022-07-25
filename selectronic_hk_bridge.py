@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO, format="[%(module)s] %(message)s")
 
 # Constants for now
 SELECT_LIVE_IP = 'x.x.x.x'
-SYSTEM_ID = 'xxxxx'
+SYSTEM_ID = 'xxx'
 
 class BatterySOC(Accessory):
 	"""Implementation of a Selectronic SP PRO 2i battery state-of-charge sensor accessory."""
@@ -162,26 +162,19 @@ class HouseLoad(Accessory):
 	def __init__(self,  *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.current_house_load = 0 # stores current state
-		self.peak_house_load = 0 # stores peak load since starting bridge
 		self.house_load_sensor_active = False
 		self.house_load_sensor_fault = int(1)
-		house_load_sensor = self.add_preload_service('CarbonDioxideSensor')
-		self.house_load_sensor_char = house_load_sensor.configure_char('CarbonDioxideDetected', value = int(0))
-		self.house_load_watts_sensor_char = house_load_sensor.configure_char('CarbonDioxideLevel')
-		self.house_load_peak_watts_sensor_char = house_load_sensor.configure_char('CarbonDioxidePeakLevel')
+		house_load_sensor = self.add_preload_service('LightSensor')
+		self.house_load_sensor_char = house_load_sensor.configure_char('CurrentAmbientLightLevel', value = 0.0001)
 		self.house_load_sensor_active_char = house_load_sensor.configure_char('StatusActive')
 		self.house_load_sensor_fault_char = house_load_sensor.configure_char('StatusFault')
 
 	@Accessory.run_at_interval(30)
 	async def run(self):
-		if self.current_house_load < 1.0:
-			self.house_load_sensor_char.set_value(int(1))
+		if self.current_house_load < 0.0001:
+			self.house_load_sensor_char.set_value(0.0001)
 		else:
-			self.house_load_sensor_char.set_value(int(0))
-		self.house_load_watts_sensor_char.set_value(self.current_house_load)
-		if self.current_house_load > self.peak_house_load:
-			self.peak_house_load = self.current_house_load
-		self.house_load_peak_watts_sensor_char.set_value(self.peak_house_load)
+			self.house_load_sensor_char.set_value(self.current_house_load)
 		self.house_load_sensor_active_char.set_value(self.house_load_sensor_active)
 		self.house_load_sensor_fault_char.set_value(self.house_load_sensor_fault)
 
