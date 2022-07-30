@@ -19,14 +19,14 @@ logging.basicConfig(level=logging.INFO, format="[%(module)s] %(message)s")
 
 # Constants for now
 SELECT_LIVE_IP = 'x.x.x.x'
-SYSTEM_ID = 'xxx'
+SYSTEM_ID = 'xxxxx'
 
 class BatterySOC(Accessory):
 	"""Implementation of a Selectronic SP PRO 2i battery state-of-charge sensor accessory."""
 
 	category = CATEGORY_SENSOR  # This is for the icon in the iOS Home app.
 
-	def __init__(self, *args, house_load_instance=None, generator_status_instance=None, **kwargs):
+	def __init__(self, *args, house_load_instance=None, solar_prod_instance=None, generator_status_instance=None, **kwargs):
 	# def __init__(self, *args, generator_status_instance=None, **kwargs):
 		"""Here, we just store a reference to the current state-of-charge characteristic and
 		   add a method that will be executed every time its value changes.
@@ -37,6 +37,8 @@ class BatterySOC(Accessory):
 		self.select_data_url = f'http://{SELECT_LIVE_IP}/cgi-bin/solarmonweb/devices/{SYSTEM_ID}/point'
 		# add the house load class instance
 		self.house_load_instance = house_load_instance
+		# add the solar production class instance
+		self.solar_prod_instance = solar_prod_instance
 		# add the generator status class instance
 		self.generator_status_instance = generator_status_instance
 		# Add the services that this Accessory will support with add_preload_service here
@@ -75,6 +77,7 @@ class BatterySOC(Accessory):
 				bat_w = float(hfdict["items"]["battery_w"])
 				grid_w = float(hfdict["items"]["grid_w"])
 				load_w = float(hfdict["items"]["load_w"])
+				solarprod_w = float(hfdict["items"]["solarinverter_w"])
 				# set battery SOC values
 				self.battery_soc_char.set_value(bat_soc)
 				self.battery_service_battery_level_char.set_value(int(bat_soc))
@@ -88,8 +91,10 @@ class BatterySOC(Accessory):
 					charging_state = int(0)
 				self.battery_service_charging_state_char.set_value(charging_state)
 				self.battery_service_status_low_battery_char.set_value(bat_low)
-				# set load value
+				# set house load value
 				self.house_load_instance.current_house_load = load_w
+				# set solar production value
+				self.solar_prod_instance.current_solar_prod = solarprod_w
 				# set generator status
 				if grid_w < -10.0:
 					self.generator_status_instance.current_generator_status = True
@@ -101,6 +106,8 @@ class BatterySOC(Accessory):
 				self.generator_status_instance.current_generator_status_fault = int(0)
 				self.house_load_instance.house_load_sensor_active = True
 				self.house_load_instance.house_load_sensor_fault = int(0)
+				self.solar_prod_instance.solar_prod_sensor_active = True
+				self.solar_prod_instance.solar_prod_sensor_fault = int(0)
 			else:
 				print(hfdata.status_code)
 				self.battery_service_charging_state_char.set_value(int(2))
@@ -111,6 +118,8 @@ class BatterySOC(Accessory):
 				self.generator_status_instance.current_generator_status_fault = int(1)
 				self.house_load_instance.house_load_sensor_active = False
 				self.house_load_instance.house_load_sensor_fault = int(1)
+				self.solar_prod_instance.solar_prod_sensor_active = False
+				self.solar_prod_instance.solar_prod_sensor_fault = int(1)
 		except BaseException as err:
 			print(f"Unexpected {err=}, {type(err)=}")
 			self.battery_service_charging_state_char.set_value(int(2))
@@ -120,6 +129,8 @@ class BatterySOC(Accessory):
 			self.generator_status_instance.current_generator_status_fault = int(1)
 			self.house_load_instance.house_load_sensor_active = False
 			self.house_load_instance.house_load_sensor_fault = int(1)
+			self.solar_prod_instance.solar_prod_sensor_active = False
+			self.solar_prod_instance.solar_prod_sensor_fault = int(1)
 			pass
 
 	# The `stop` method can be `async` as well
@@ -138,7 +149,7 @@ class GeneratorStatus(Accessory):
 		super().__init__(*args, **kwargs)
 		self.current_generator_status = False # stores current state
 		self.current_generator_status_active = False 
-		self.current_generator_status_fault = int(1)
+		self.current_generator_status_fault = int(0)
 		generator_status_sensor = self.add_preload_service('MotionSensor')
 		self.generator_status_sensor_char = generator_status_sensor.configure_char('MotionDetected', setter_callback=self.set_gen_status)
 		self.generator_status_sensor_active_char = generator_status_sensor.configure_char('StatusActive')
@@ -163,7 +174,7 @@ class HouseLoad(Accessory):
 		super().__init__(*args, **kwargs)
 		self.current_house_load = 0 # stores current state
 		self.house_load_sensor_active = False
-		self.house_load_sensor_fault = int(1)
+		self.house_load_sensor_fault = int(0)
 		house_load_sensor = self.add_preload_service('LightSensor')
 		self.house_load_sensor_char = house_load_sensor.configure_char('CurrentAmbientLightLevel', value = 0.0001)
 		self.house_load_sensor_active_char = house_load_sensor.configure_char('StatusActive')
@@ -178,6 +189,30 @@ class HouseLoad(Accessory):
 		self.house_load_sensor_active_char.set_value(self.house_load_sensor_active)
 		self.house_load_sensor_fault_char.set_value(self.house_load_sensor_fault)
 
+class SolarProd(Accessory):
+	"""Solar production in watts"""
+
+	category = CATEGORY_SENSOR
+
+	def __init__(self,  *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.current_solar_prod = 0 # stores current state
+		self.solar_prod_sensor_active = False
+		self.solar_prod_sensor_fault = int(0)
+		solar_prod_sensor = self.add_preload_service('LightSensor')
+		self.solar_prod_sensor_char = solar_prod_sensor.configure_char('CurrentAmbientLightLevel', value = 0.0001)
+		self.solar_prod_sensor_active_char = solar_prod_sensor.configure_char('StatusActive')
+		self.solar_prod_sensor_fault_char = solar_prod_sensor.configure_char('StatusFault')
+
+	@Accessory.run_at_interval(35)
+	async def run(self):
+		if self.current_solar_prod < 0.0001:
+			self.solar_prod_sensor_char.set_value(0.0001)
+		else:
+			self.solar_prod_sensor_char.set_value(self.current_solar_prod)
+		self.solar_prod_sensor_active_char.set_value(self.solar_prod_sensor_active)
+		self.solar_prod_sensor_fault_char.set_value(self.solar_prod_sensor_fault)
+
 def get_accessory(driver):
 	"""Call this method to get a standalone Accessory."""
 	return BatterySOC(driver, 'BatterySOC')
@@ -185,10 +220,11 @@ def get_accessory(driver):
 def get_bridge(driver):
 	bridge = Bridge(driver, 'SelectronicBridge')
 	house_load_instance = HouseLoad(driver, 'Load in watts')
+	solar_prod_instance = SolarProd(driver, 'Solar production in watts')
 	generator_status_instance = GeneratorStatus(driver, 'Generator status')
-	bridge.add_accessory(BatterySOC(driver, 'House', house_load_instance=house_load_instance, generator_status_instance=generator_status_instance))
-	# bridge.add_accessory(BatterySOC(driver, 'Battery SOC', generator_status_instance=generator_status_instance))
+	bridge.add_accessory(BatterySOC(driver, 'House', house_load_instance=house_load_instance, solar_prod_instance=solar_prod_instance, generator_status_instance=generator_status_instance))
 	bridge.add_accessory(house_load_instance)
+	bridge.add_accessory(solar_prod_instance)
 	bridge.add_accessory(generator_status_instance)
 	return bridge
 
