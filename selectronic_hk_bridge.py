@@ -114,7 +114,7 @@ class BatterySOC(Accessory):
 				# set battery SOC values
 				self.battery_soc_char.set_value(bat_soc)
 				self.battery_service_battery_level_char.set_value(int(bat_soc))
-				if bat_soc < 40.0:
+				if bat_soc < BATTERY_SOC_SENSOR_LOW_WATER_MARK:
 					bat_low = int(1)
 				else:
 					bat_low = int(0)
