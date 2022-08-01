@@ -13,13 +13,44 @@ import json
 import time
 import logging
 import signal
-import random
+import configparser
+import argparse
+from  pathlib import PurePath
+
+# get path to ini and state files
+parser = argparse.ArgumentParser(description='Selectronic to HomeKit Bridge')
+parser.add_argument('-p', action="store", dest="ini_state_path", default="", help="Path to ini and state files")
+results = parser.parse_args()
+INI_STATE_PATH = results.ini_state_path
 
 logging.basicConfig(level=logging.INFO, format="[%(module)s] %(message)s")
 
-# Constants for now
-SELECT_LIVE_IP = 'x.x.x.x'
-SYSTEM_ID = 'xxxxx'
+# get config parameters
+
+'''
+Configuration ini file looks like:
+
+[DEFAULT]
+BatterySocSensorLowWaterMark = 20
+BatterySocSensorHighWaterMark = 95
+
+[selectronic]
+SelectLiveIp = x.x.x.x
+SystemId = xxxxxxxxx
+
+[homekit]
+BatterySocSensorLowWaterMark = 20
+BatterySocSensorHighWaterMark = 95
+'''
+
+config = configparser.ConfigParser()
+config.read(PurePath(INI_STATE_PATH, "selectronic_hk_bridge.ini"))
+SELECT_LIVE_IP = config['selectronic']['SelectLiveIp']
+SYSTEM_ID = config['selectronic']['SystemId']
+BATTERY_SOC_SENSOR_LOW_WATER_MARK = int(config['homekit']['BatterySocSensorLowWaterMark'])
+BATTERY_SOC_SENSOR_HIGH_WATER_MARK = int(config['homekit']['BatterySocSensorHighWaterMark'])
+
+# define accessories
 
 class BatterySOC(Accessory):
 	"""Implementation of a Selectronic SP PRO 2i battery state-of-charge sensor accessory."""
@@ -33,8 +64,10 @@ class BatterySOC(Accessory):
 		"""
 		# If overriding this method, be sure to call the super's implementation first.
 		super().__init__(*args, **kwargs)
-
+		# select.live local URL
 		self.select_data_url = f'http://{SELECT_LIVE_IP}/cgi-bin/solarmonweb/devices/{SYSTEM_ID}/point'
+		# count of bad data retreival attempts
+		self.bad_data_gets = 0
 		# add the house load class instance
 		self.house_load_instance = house_load_instance
 		# add the solar production class instance
@@ -108,6 +141,7 @@ class BatterySOC(Accessory):
 				self.house_load_instance.house_load_sensor_fault = int(0)
 				self.solar_prod_instance.solar_prod_sensor_active = True
 				self.solar_prod_instance.solar_prod_sensor_fault = int(0)
+				self.bad_data_gets = 0
 			else:
 				print(hfdata.status_code)
 				self.battery_service_charging_state_char.set_value(int(2))
@@ -120,6 +154,9 @@ class BatterySOC(Accessory):
 				self.house_load_instance.house_load_sensor_fault = int(1)
 				self.solar_prod_instance.solar_prod_sensor_active = False
 				self.solar_prod_instance.solar_prod_sensor_fault = int(1)
+				self.bad_data_gets += 1
+				if self.bad_data_gets > 10:
+					exit()
 		except BaseException as err:
 			print(f"Unexpected {err=}, {type(err)=}")
 			self.battery_service_charging_state_char.set_value(int(2))
@@ -131,6 +168,9 @@ class BatterySOC(Accessory):
 			self.house_load_instance.house_load_sensor_fault = int(1)
 			self.solar_prod_instance.solar_prod_sensor_active = False
 			self.solar_prod_instance.solar_prod_sensor_fault = int(1)
+			self.bad_data_gets += 1
+			if self.bad_data_gets > 10:
+				exit()
 			pass
 
 	# The `stop` method can be `async` as well
@@ -231,7 +271,7 @@ def get_bridge(driver):
 
 
 # Start the bridge on port 51826
-driver = AccessoryDriver(port=51826, persist_file='selectronic_hk_bridge.state')
+driver = AccessoryDriver(port=51826, persist_file=PurePath(INI_STATE_PATH, "selectronic_hk_bridge.state"))
 driver.add_accessory(accessory=get_bridge(driver))
 
 # We want SIGTERM (terminate) to be handled by the driver itself,
