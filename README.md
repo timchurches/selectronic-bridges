@@ -16,4 +16,8 @@ Efforts to expose Selectronic SP PRO hybrid inverter data in HomeKit and other h
   > `pip3 install HAP-python[QRCode]`
   > `cd HAP-python`
   > `sudo python3 setup.py install`
-9. 
+9. To be continued....
+
+## Telefraf and InfluxDB and Grafana
+
+Detailed instructions will appear here, but basically following the instructions for installing  InfluxDb and Telegraf detailed [here](https://pimylifeup.com/raspberry-pi-influxdb/_ and [here](https://nwmichl.net/2020/07/14/telegraf-influxdb-grafana-on-raspberrypi-from-scratch/)
