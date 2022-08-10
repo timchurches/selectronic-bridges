@@ -21,3 +21,7 @@ Efforts to expose Selectronic SP PRO hybrid inverter data in HomeKit and other h
 ## Telefraf and InfluxDB and Grafana
 
 Detailed instructions will appear here, but basically following the instructions for installing  InfluxDb and Telegraf detailed [here](https://pimylifeup.com/raspberry-pi-influxdb/_ and [here](https://nwmichl.net/2020/07/14/telegraf-influxdb-grafana-on-raspberrypi-from-scratch/)
+
+## TP-Link
+
+Leverage https://github.com/softScheck/tplink-smartplug/blob/master/tplink_smartplug.py
