@@ -12,16 +12,13 @@ Efforts to expose Selectronic SP PRO hybrid inverter data in HomeKit and other h
 7. Install `git`: `sudo apt-get install git`
 8. Clone the forked version of the `HAP-python` package (into the pi user home directory, so `cd ~` first if necessary): `gh repo clone timchurches/HAP-python`
 9. Install `HAP-python` official version to get dependencies, then the forked version: 
-
-  > `sudo apt-get install python3-pip`
-
-  > `sudo apt-get install libavahi-compat-libdnssd-dev`
-  
-  > `pip3 install HAP-python[QRCode]`
-  
-  > `cd HAP-python`
-  
-  > `sudo python3 setup.py install`
+```
+sudo apt-get install python3-pip
+sudo apt-get install libavahi-compat-libdnssd-dev
+pip3 install HAP-python[QRCode]
+cd HAP-python
+sudo python3 setup.py install
+```
 
 10. To be continued....
 
@@ -30,25 +27,24 @@ Efforts to expose Selectronic SP PRO hybrid inverter data in HomeKit and other h
 Detailed instructions will appear here, but basically following the instructions for installing  InfluxDb and Telegraf detailed [here](https://pimylifeup.com/raspberry-pi-influxdb/) and [here](https://nwmichl.net/2020/07/14/telegraf-influxdb-grafana-on-raspberrypi-from-scratch/)
 
 11. Install the influxdb repository key:
-> `curl https://repos.influxdata.com/influxdb.key | gpg --dearmor | sudo tee /usr/share/keyrings/influxdb-archive-keyring.gpg >/dev/null`
-
-> `echo "deb [signed-by=/usr/share/keyrings/influxdb-archive-keyring.gpg] https://repos.influxdata.com/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/influxdb.list`
-
-> `sudo apt update`
+```
+curl https://repos.influxdata.com/influxdb.key | gpg --dearmor | sudo tee /usr/share/keyrings/influxdb-archive-keyring.gpg >/dev/null
+echo "deb [signed-by=/usr/share/keyrings/influxdb-archive-keyring.gpg] https://repos.influxdata.com/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+sudo apt update
+```
 
 12. Install influxdb
-
-> `sudo apt install influxdb`
-
-> `sudo systemctl unmask influxdb`
-
-> `sudo systemctl enable influxdb`
+```
+sudo apt install influxdb
+sudo systemctl unmask influxdb
+sudo systemctl enable influxdb
+```
 
 13. Start influxdb and check it is accessible
-
-> `sudo systemctl start influxdb`
-
-> `influx`
+```
+sudo systemctl start influxdb
+influx
+```
 
 That should take you to the influxdb command prompt. Exit by typing `exit`.
 
