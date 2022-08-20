@@ -21,32 +21,22 @@ sudo apt update
 sudo apt full-upgrade
 ```
 
-4. Start the RPi configuration utility with `sudo raspi-config`. 
+1. Start the RPi configuration utility with `sudo raspi-config`. 
     1. Then under _System Option_ make sure _Network at Boot_ is set to **Yes** (this ensure the wi-fi and/or ethernet network connections are up before trying to start the InfluxDB and telegraf daemons)
     1. Under _Localisation Options_ make sure the **en_AU.UTF-8** locale is selected and is the default, that the _Timezone_ is correct and that the _WLAN Country_ is set to **AU**.
     1. Choose reboot when exiting the config utility, wait for the RPi o reboot, then reconnect to it via ssh as described above.
-5. Install `git` with `sudo apt-get install git`
-6. 
+1. Install `git` with `sudo apt-get install git` then configure it, replacing First_name, Last_name and the email address with your actual names and email address (in quotes as shown) (the email address you used to register with GitHub is the best one to use):
 
-
-
-1. Clone the forked version of the `HAP-python` package (into the pi user home directory, so `cd ~` first if necessary): `gh repo clone timchurches/HAP-python`
-1. Install `HAP-python` official version to get dependencies, then the forked version: 
 ```
-sudo apt-get install python3-pip
-sudo apt-get install libavahi-compat-libdnssd-dev
-pip3 install HAP-python[QRCode]
-cd HAP-python
-sudo python3 setup.py install
+git config --global user.name "First_name Last_name"
+git config --global user.email "my_name@example.com"
 ```
-
-1. To be continued....
 
 ## Telefraf and InfluxDB and Grafana
 
 Detailed instructions will appear here, but basically following the instructions for installing  InfluxDb and Telegraf detailed [here](https://pimylifeup.com/raspberry-pi-influxdb/) and [here](https://nwmichl.net/2020/07/14/telegraf-influxdb-grafana-on-raspberrypi-from-scratch/)
 
-11. Install the influxdb and grafana repository keys:
+1. Install the influxdb and grafana repository keys (ignore the warning about `apt-key add` being deprecated):
 
 ```
 curl https://repos.influxdata.com/influxdb.key | gpg --dearmor | sudo tee /usr/share/keyrings/influxdb-archive-keyring.gpg >/dev/null
@@ -66,7 +56,7 @@ sudo systemctl unmask telegraf
 sudo systemctl enable telegraf
 sudo systemctl enable grafana-server
 ```
-```
+
 
 1. Start InfluxDB
 
@@ -80,21 +70,32 @@ sudo systemctl status influxdb
 1. Configure InfluxDB
 
     1. Invoke the influxdb command shell with the command : `influx`
-    1. Issue the following commands at the influx coammnd prompt, substituting a password of your choice for XXXXX below
+    1. Issue the following commands, line-by-line, at the influx coammnd prompt, substituting a password of your choice for XXXXX below
 
 ```
 create database selectronic
 use selectronic
 create user telegrafuser with password 'XXXXX' with all privileges
 grant all privileges on selectronic to telegrafuser
-create retention policy "5years" on "selectronic" duration 5y replication 1 default
+create retention policy "forever" on "selectronic" duration INF replication 1 default
 exit
 ```
 
-4. 
+1. 
 That should take you to the influxdb command prompt. Exit by typing `exit`.
 
 
+## HomeKit bridge set-up
+
+1. Clone the forked version of the `HAP-python` package (into the pi user home directory, so `cd ~` first if necessary): `gh repo clone timchurches/HAP-python`
+1. Install `HAP-python` official version to get dependencies, then the forked version: 
+```
+sudo apt-get install python3-pip
+sudo apt-get install libavahi-compat-libdnssd-dev
+pip3 install HAP-python[QRCode]
+cd HAP-python
+sudo python3 setup.py install
+```
 ## TP-Link
 
 Leverage https://github.com/softScheck/tplink-smartplug/blob/master/tplink_smartplug.py
