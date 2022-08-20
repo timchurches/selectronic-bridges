@@ -101,10 +101,22 @@ Configure telegraf to collect data from your local Select.live interface device:
     1. At the RPi terminal prompt, issue `sudo systemctl start telegraf`
     1. Check the status of teh daemon with `sudo systemctl status telegraf` - there should be no errors reported.
     
-1. At this stage the telegraf
-    
+1. At this stage the telegraf daemon shoud be collecting data from your local Select.live device over your local network. Check this by starting the InfluxDB shell with `influx` and then issuing these commands:
+
+```
+use selectronic
+select * from selectronic
+```
+
+You should see data. Try repeatedly issuing the command `select count(battery_soc) from selectronic` to show the number of rows in the database. Repeat the command (use up-arrow to recall it) every 15 seconds or so and you should see the count incrementing. When satisfied exit the InfluxDB shell with the command `exit`.
+
+1. Configure grafana
+
+
     
 ## HomeKit bridge set-up
+
+The following steps are only needed if you have Apple HomeKit home automation. The steps below are not yet fully documented so don't undertke them yet.
 
 1. Clone the forked version of the `HAP-python` package (into the pi user home directory, so `cd ~` first if necessary): `gh repo clone timchurches/HAP-python`
 1. Install `HAP-python` official version to get dependencies, then the forked version: 
@@ -117,4 +129,5 @@ sudo python3 setup.py install
 ```
 ## TP-Link
 
-Leverage https://github.com/softScheck/tplink-smartplug/blob/master/tplink_smartplug.py
+For future use, leverage https://github.com/softScheck/tplink-smartplug/blob/master/tplink_smartplug.py to provide direct load switching automation via the cheap TP-Link devices, without the need for Apple HomeKit of other home automation systems.
+
