@@ -12,7 +12,10 @@ Efforts to expose Selectronic SP PRO hybrid inverter data in HomeKit and other h
 1. Place the microSD card in yoyr RPi and power it up. Wait a few minutes while the first-time boot process completes, then confirm that your RPi has connected to your wi-fi and that you can log in to it using ssh (from your command line or terminal prompt on your local computer, issue somehting like `ssh pi@selectronic-bridge.local` or on Windows, use the [PuTTY ssh client](https://www.putty.org))
     1. If that doesn't work, then your local network router (which is probably your internet/wi-fi router) may not support _multicast DNS_ (mDNS), in which case you will need to find the IP address which your RPi server has been issued via DCHP by your router. Use the configuration interface for your router to find the IP address allocated to your RPi, or use `nmap` or other network scanning utilities to determine its IP address).
     1. While you are using the router configuration interface, also carry out the next step immediately below.
-1. Using the configurartion or administration interface for your router, configure DCHP to permnanently assign the same IP address to your RPi server. You may find these settings under _Advanced setting_ or similar. Exact details vary from router to router. 
+1. Using the configurartion or administration interface for your router (exact details vary from router to router):
+    1. configure DCHP to permnanently assign a fixed IP address to your RPi server. You may find these settings under _Advanced setting_ or similar.
+    1. determine the IP address of your local Select.live interface (the IP address it uses is also shown on the LCD screen on the Select.live device) and note it down, and similarly configure DCHP to permnanently assign a fixed IP address to your local Select.live interface device.
+
 1. Henceforth all commands should be issued at the RPi terminal prompt in your ssh client unless otherwise stated.
 1. Update the RPi system with:
 
@@ -82,8 +85,10 @@ exit
 ```
 
 1. 
-That should take you to the influxdb command prompt. Exit by typing `exit`.
-
+Configure telegraf to collect data from your local Select.live interface device:
+    1. Make sure you know the permanently assigned IP addess for you Select.live interface box (as detailed in the section on DCHP configuration above).
+    1. Using a web browser, go to http://x.x.x.x/cgi-bin/solarmonweb/devices where x.x.x.x is the IP address of your local Select.live interface device
+    1. You should see a page of data in JSON format. Keep that page open in a browser tab (you will need to copy-and-paste the **id** hash value shortly).
 
 ## HomeKit bridge set-up
 
