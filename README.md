@@ -110,7 +110,7 @@ select * from selectronic
 
 You should see data. Try repeatedly issuing the command `select count(battery_soc) from selectronic` to show the number of rows in the database. Repeat the command (use up-arrow to recall it) every 15 seconds or so and you should see the count incrementing. When satisfied exit the InfluxDB shell with the command `exit`.
 
-1. Configure grafana
+### Configure grafana
 
 
     
