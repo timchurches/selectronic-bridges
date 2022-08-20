@@ -89,7 +89,11 @@ Configure telegraf to collect data from your local Select.live interface device:
     1. Make sure you know the permanently assigned IP addess for you Select.live interface box (as detailed in the section on DCHP configuration above).
     1. Using a web browser, go to http://x.x.x.x/cgi-bin/solarmonweb/devices where x.x.x.x is the IP address of your local Select.live interface device
     1. You should see a page of data in JSON format. Keep that page open in a browser tab (you will need to copy-and-paste the **id** hash value shortly).
-
+    1. Open the [telegraf.conf](https://github.com/timchurches/selectronic-bridges/blob/main/telegraf.conf) template file in another browser tab. Click on the **Raw** button to see it in raw form. Keep that tab open, you will shortly need to copy-and-paste it.
+    1. In the RPi terminal client, issue the command `sudo mv /etc/telegraf/telegraf.conf /etc/telegraf/telegraf.conf_bak`
+    1. Create a new, empty telegraf.conf file with  `sudo nano /etc/telegraf/telegraf.conf` 
+    1. Copy-and-paste the entire contents of the telegraf.conf template file you opened in your web browser above into the empty telegraf.conf file on your RPi.
+    1. 
 ## HomeKit bridge set-up
 
 1. Clone the forked version of the `HAP-python` package (into the pi user home directory, so `cd ~` first if necessary): `gh repo clone timchurches/HAP-python`
