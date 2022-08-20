@@ -93,7 +93,17 @@ Configure telegraf to collect data from your local Select.live interface device:
     1. In the RPi terminal client, issue the command `sudo mv /etc/telegraf/telegraf.conf /etc/telegraf/telegraf.conf_bak`
     1. Create a new, empty telegraf.conf file with  `sudo nano /etc/telegraf/telegraf.conf` 
     1. Copy-and-paste the entire contents of the telegraf.conf template file you opened in your web browser above into the empty telegraf.conf file on your RPi.
-    1. 
+    1. Scroll to the section _## HTTP Basic Auth_ and replace the XXXXXXX with the password you specified for _telegrafuser_ in the InfluxDB  configuration steps above.
+    1. Scroll down to the _[[inputs.http]]_ section and, in the line starting with _urls =_, replace the X.X.X.X with the IP address of your local Select.live interface device, and replace the XXXXXXXXXXXXXXX with the alphanumeric **id* hash string from the local Select.live device information page you opened in a browser tab a few steps above.
+    1. Write the file to disc by pressing Ctrl-O (oh, not zero) then Enter, followed by Ctrl-X (note, that's the control key, not the command key on a Mac).
+    
+1. Start the telegraf data collection daemon:
+    1. At the RPi terminal prompt, issue `sudo systemctl start telegraf`
+    1. Check the status of teh daemon with `sudo systemctl status telegraf` - there should be no errors reported.
+    
+1. At this stage the telegraf
+    
+    
 ## HomeKit bridge set-up
 
 1. Clone the forked version of the `HAP-python` package (into the pi user home directory, so `cd ~` first if necessary): `gh repo clone timchurches/HAP-python`
