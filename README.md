@@ -132,6 +132,13 @@ You should see data. Try repeatedly issuing the command `select count(battery_so
 1. Voilà! You should see a dashboard displaying your local Selectronic parameters.
 1. Set the refresh rate by clicking on the two-arrow-in-a-circle icon at the upper right and choose 15s. You can also put the display in kiosk mode using the upper right-most icon. You can copy the URL for that view and bookmark it or share it to go to exactly that view. However, you may wish to create a read-only user account for sharing purposes first. This will be documented below shortly.
 
+### Create a read-only kiosk-mode user in Grafana
+
+1. Hover your mouse over the _Server admin_ icon (the shield at the bottom left of the page) and choose _Users_.
+1. Click on _New user_ and create a new user with username "kiosk" and a suitable (different) password (use any name and email address you wish, probably yours).
+1. Click on the new user's name in the user list and check their permissions. They should not have admin permissions, and should have view permissions for the default organisation (Main Org.).
+1. Test the kiosk account by logging in to your Grafana server from a different device (such as an iPad or other tablet, or from your mobile phone). You can then use this acount for read-only kiosk style displays on a spare iPad or tablet computer etc.
+
 ## HomeKit bridge set-up
 
 The following steps are only needed if you have Apple HomeKit home automation. The steps below are not yet fully documented so don't undertke them yet.
