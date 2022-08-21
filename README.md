@@ -128,7 +128,7 @@ You should see data. Try repeatedly issuing the command `select count(battery_so
 
 ### Set-up the prototype Selectronic dashboard
 
-1. In the Grafana page which you have open in your web browser, hover you mouse over the Dashboards icon (four small squares on the left) and choose _Import_. Click on _Upload JSON file_ and select the file _Selectronic_prototype_dashboard.json_ from the directory where you downloaded and unzipped the zip file for this repository. Click _Upload_.
+1. In the Grafana page which you have open in your web browser, hover you mouse over the Dashboards icon (four small squares on the left) and choose _Import_. Click on _Upload JSON file_ and select the file _Selectronic-Current-State-Dashboard.json_ from the directory where you downloaded and unzipped the zip file for this repository. Click _Upload_.
 1. You should be at the Options page for the dashboard definition to be imported. Change the InfluxDB field to _InfluxDB (default)_ and click import.
 1. Voilà! You should see a dashboard displaying your local Selectronic parameters.
 1. Set the refresh rate by clicking on the two-arrow-in-a-circle icon at the upper right and choose 15s. You can also put the display in kiosk mode using the upper right-most icon. You can copy the URL for that view and bookmark it or share it to go to exactly that view. However, you may wish to create a read-only user account for sharing purposes first. This will be documented below shortly.
