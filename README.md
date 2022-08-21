@@ -141,10 +141,13 @@ You should see data. Try repeatedly issuing the command `select count(battery_so
 
 ## HomeKit bridge set-up
 
-The following steps are only needed if you have Apple HomeKit home automation. The steps below are not yet fully documented so don't undertke them yet.
+**Mote**: the following instructions are a work-in-progess and are incomplete. They will be completed by the end of August 2022.
 
-1. Clone the forked version of the `HAP-python` package (into the pi user home directory, so `cd ~` first if necessary): `gh repo clone timchurches/HAP-python`
+The following steps are only needed if you have Apple HomeKit home automation.
+
+1. Clone the forked version of the `HAP-python` package (into the pi user home directory, so `cd ~` first if necessary): `git clone https://github.com/timchurches/HAP-python.git`
 1. Install `HAP-python` official version to get dependencies, then the forked version: 
+
 ```
 sudo apt-get install python3-pip
 sudo apt-get install libavahi-compat-libdnssd-dev
@@ -152,6 +155,7 @@ pip3 install HAP-python[QRCode]
 cd HAP-python
 sudo python3 setup.py install
 ```
+
 ## TP-Link
 
 For future use, leverage https://github.com/softScheck/tplink-smartplug/blob/master/tplink_smartplug.py to provide direct load switching automation via the cheap TP-Link devices, without the need for Apple HomeKit of other home automation systems.
