@@ -1,4 +1,5 @@
 # selectronic-bridges
+
 Efforts to expose Selectronic SP PRO hybrid inverter data in HomeKit and other home automation frameworks, and collect it in InfluxDB for visualisation via Grafana dashboards.
 
 ## Selectronic SP PRO 2i to Apple HomeKit bridge
