@@ -49,7 +49,7 @@ echo "deb https://packages.grafana.com/oss/deb stable main" | sudo tee /etc/apt/
 sudo apt update
 ```
 
-12. Install influxdb, telegraf and grafana
+1. Install influxdb, telegraf and grafana
 
 ```
 sudo apt-get install -y grafana influxdb telegraf
@@ -84,8 +84,7 @@ create retention policy "forever" on "selectronic" duration INF replication 1 de
 exit
 ```
 
-1. 
-Configure telegraf to collect data from your local Select.live interface device:
+1. Configure telegraf to collect data from your local Select.live interface device:
     1. Make sure you know the permanently assigned IP addess for you Select.live interface box (as detailed in the section on DCHP configuration above).
     1. Using a web browser, go to http://x.x.x.x/cgi-bin/solarmonweb/devices where x.x.x.x is the IP address of your local Select.live interface device
     1. You should see a page of data in JSON format. Keep that page open in a browser tab (you will need to copy-and-paste the **id** hash value shortly).
@@ -112,7 +111,20 @@ You should see data. Try repeatedly issuing the command `select count(battery_so
 
 ### Configure grafana
 
+1. Start the _grafana-server_ daemon with `sudo systemctl start grafana-server`. Check that there are no errors with `sudo systemctl status grafana-server`.
+1. In your web browser, open the _grafana_ page at [http://selectronic-bridge.local:3000/](http://selectronic-bridge.local:3000/). Note that if mDNS is not working on your LAN then you will need to substitute the IP address of your Rpi server for "selectronic-bridge.local" in the URL above.
+1. Log in as _admin_, password _admin_. You will be asked to chnage the _admin_ password. You will then be at the _grafana_ home page.
+1. Hover your mouse pointer over the config icon (cog wheel) on the left-hand side and choose _Data sources_. Click on _Add data source_ and then click on _InfluxDB_. 
+1. In the _HTTP_ section, set _URL_ to http://localhost:8086/
+1. Scroll down to _InfluxDB Details_ and set the parameters as follows:
+    1. Database: selectronic
+    1. User: telegrafuser
+    1. Password: <substitute the password for the telegrafuser account which you created above>
+    1. http method: GET
+1. Click _Save & test_. You should see a confirmation that the datasource is accessible and working.
+1. Return to the _grafana_ home page by clicking on the Grafana icon at the top on the left.
 
+###
     
 ## HomeKit bridge set-up
 
