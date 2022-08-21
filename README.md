@@ -161,3 +161,7 @@ sudo python3 setup.py install
 
 For future use, leverage https://github.com/softScheck/tplink-smartplug/blob/master/tplink_smartplug.py to provide direct load switching automation via the cheap TP-Link devices, without the need for Apple HomeKit of other home automation systems.
 
+## References
+
+* TIG stack installation on RPi: https://nwmichl.net/2020/07/14/telegraf-influxdb-grafana-on-raspberrypi-from-scratch/
+    
