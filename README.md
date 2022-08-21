@@ -15,6 +15,7 @@ Efforts to expose Selectronic SP PRO hybrid inverter data in HomeKit and other h
 1. Using the configurartion or administration interface for your router (exact details vary from router to router):
     1. configure DCHP to permnanently assign a fixed IP address to your RPi server. You may find these settings under _Advanced setting_ or similar.
     1. determine the IP address of your local Select.live interface (the IP address it uses is also shown on the LCD screen on the Select.live device) and note it down, and similarly configure DCHP to permnanently assign a fixed IP address to your local Select.live interface device.
+1. Download a zip file of this repository by clicking on the Code button at the upper right and choosing Zip file. Save the zip file locally on your computer and unzip it.
 
 1. Henceforth all commands should be issued at the RPi terminal prompt in your ssh client unless otherwise stated.
 1. Update the RPi system with:
@@ -124,8 +125,13 @@ You should see data. Try repeatedly issuing the command `select count(battery_so
 1. Click _Save & test_. You should see a confirmation that the datasource is accessible and working.
 1. Return to the _grafana_ home page by clicking on the Grafana icon at the top on the left.
 
-###
-    
+### Set-up the prototype Selectronic dashboard
+
+1. In the Grafana page which you have open in your web browser, hover you mouse over the Dashboards icon (four small squares on the left) and choose _Import_. Click on _Upload JSON file_ and select the file _Selectronic_prototype_dashboard.json_ from the directory where you downloaded and unzipped the zip file for this repository. Click _Upload_.
+1. You should be at the Options page for the dashboard definition to be imported. Change the InfluxDB field to _InfluxDB (default)_ and click import.
+1. Voilà! You should see a dashboard displaying your local Selectronic parameters.
+1. Set the refresh rate by clicking on the two-arrow-in-a-circle icon at the upper right and choose 15s. You can also put the display in kiosk mode using the upper right-most icon. You can copy the URL for that view and bookmark it or share it to go to exactly that view. However, you may wish to create a read-only user account for sharing purposes first. This will be documented below shortly.
+
 ## HomeKit bridge set-up
 
 The following steps are only needed if you have Apple HomeKit home automation. The steps below are not yet fully documented so don't undertke them yet.
