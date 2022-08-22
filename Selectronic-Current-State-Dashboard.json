@@ -71,6 +71,8 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "max": 100,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -169,6 +171,8 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "max": 10000,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -264,6 +268,8 @@
             "mode": "continuous-RdYlGr"
           },
           "mappings": [],
+          "max": 10000,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -362,6 +368,8 @@
           },
           "decimals": 0,
           "mappings": [],
+          "max": 10000,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -457,6 +465,8 @@
             "mode": "continuous-GrYlRd"
           },
           "mappings": [],
+          "max": 10000,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -579,7 +589,6 @@
   "timezone": "browser",
   "title": "Selectronic Current State",
   "uid": "hlu1FiW4k",
-  "version": 6,
+  "version": 7,
   "weekStart": ""
 }
- 
