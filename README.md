@@ -159,7 +159,7 @@ sudo python3 setup.py install
 
 ## TP-Link
 
-For future use, leverage https://github.com/softScheck/tplink-smartplug/blob/master/tplink_smartplug.py to provide direct load switching automation via the cheap TP-Link devices, without the need for Apple HomeKit of other home automation systems.
+For future use, leverage https://github.com/softScheck/tplink-smartplug/blob/master/tplink_smartplug.py to provide direct load switching automation via the cheap TP-Link devices, without the need for Apple HomeKit of other home automation systems. Also, or even better: https://github.com/python-kasa/python-kasa
 
 ## References
 
