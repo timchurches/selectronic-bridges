@@ -87,7 +87,7 @@ exit
 ```
 
 1. Configure telegraf to collect data from your local Select.live interface device:
-    1. Make sure you know the permanently assigned IP addess for you Select.live interface box (as detailed in the section on DCHP configuration above).
+    1. Make sure you know the permanently assigned IP address for you Select.live interface box (as detailed in the section on DCHP configuration above).
     1. Using a web browser, go to http://x.x.x.x/cgi-bin/solarmonweb/devices where x.x.x.x is the IP address of your local Select.live interface device
     1. You should see a page of data in JSON format. Keep that page open in a browser tab (you will need to copy-and-paste the **id** hash value shortly).
     1. Open the [telegraf.conf](https://github.com/timchurches/selectronic-bridges/blob/main/telegraf.conf) template file in another browser tab. Click on the **Raw** button to see it in raw form. Keep that tab open, you will shortly need to copy-and-paste it.
@@ -100,9 +100,9 @@ exit
     
 1. Start the telegraf data collection daemon:
     1. At the RPi terminal prompt, issue `sudo systemctl start telegraf`
-    1. Check the status of teh daemon with `sudo systemctl status telegraf` - there should be no errors reported.
+    1. Check the status of the daemon with `sudo systemctl status telegraf` - there should be no errors reported.
     
-1. At this stage the telegraf daemon shoud be collecting data from your local Select.live device over your local network. Check this by starting the InfluxDB shell with `influx` and then issuing these commands:
+1. At this stage the telegraf daemon should be collecting data from your local Select.live device over your local network. Check this by starting the InfluxDB shell with `influx` and then issuing these commands:
 
 ```
 use selectronic
