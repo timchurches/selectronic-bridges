@@ -11,7 +11,7 @@ These instructions are a work-in-progress for RPi servers. Instructions for MacO
 1. Place the microSD card in yoyr RPi and power it up. Wait a few minutes while the first-time boot process completes, then confirm that your RPi has connected to your wi-fi and that you can log in to it using ssh (from your command line or terminal prompt on your local computer, issue somehting like `ssh pi@selectronic-bridge.local` or on Windows, use the [PuTTY ssh client](https://www.putty.org))
     1. If that doesn't work, then your local network router (which is probably your internet/wi-fi router) may not support _multicast DNS_ (mDNS), in which case you will need to find the IP address which your RPi server has been issued via DCHP by your router. Use the configuration interface for your router to find the IP address allocated to your RPi, or use `nmap` or other network scanning utilities to determine its IP address).
     1. While you are using the router configuration interface, also carry out the next step immediately below.
-1. Using the configurartion or administration interface for your router (exact details vary from router to router):
+1. Using the configuration or administration interface for your router (exact details vary from router to router):
     1. configure DCHP to permnanently assign a fixed IP address to your RPi server. You may find these settings under _Advanced setting_ or similar.
     1. determine the IP address of your local Select.live interface (the IP address it uses is also shown on the LCD screen on the Select.live device) and note it down, and similarly configure DCHP to permnanently assign a fixed IP address to your local Select.live interface device.
 1. Download a zip file of this repository by clicking on the Code button at the upper right and choosing Zip file. Save the zip file locally on your computer and unzip it.
@@ -25,7 +25,7 @@ sudo apt full-upgrade
 ```
 
 1. Start the RPi configuration utility with `sudo raspi-config`. 
-    1. Then under _System Option_ make sure _Network at Boot_ is set to **Yes** (this ensure the wi-fi and/or ethernet network connections are up before trying to start the InfluxDB and telegraf daemons)
+    1. Then under _System Option_ make sure _Network at Boot_ is set to **Yes** (this ensures that the wi-fi and/or ethernet network connections are up before trying to start the InfluxDB and telegraf daemons)
     1. Under _Localisation Options_ make sure the **en_AU.UTF-8** locale is selected and is the default, that the _Timezone_ is correct and that the _WLAN Country_ is set to **AU**.
     1. Choose reboot when exiting the config utility, wait for the RPi o reboot, then reconnect to it via ssh as described above.
 1. Install `git` with `sudo apt-get install git` then configure it, replacing First_name, Last_name and the email address with your actual names and email address (in quotes as shown) (the email address you used to register with GitHub is the best one to use):
@@ -37,7 +37,7 @@ git config --global user.email "my_name@example.com"
 
 ## Telefraf and InfluxDB and Grafana
 
-Detailed instructions will appear here, but basically following the instructions for installing  InfluxDb and Telegraf detailed [here](https://pimylifeup.com/raspberry-pi-influxdb/) and [here](https://nwmichl.net/2020/07/14/telegraf-influxdb-grafana-on-raspberrypi-from-scratch/)
+Detailed instructions appear below, but basically we are following the instructions for installing  InfluxDb and Telegraf detailed [here](https://pimylifeup.com/raspberry-pi-influxdb/) and [here](https://nwmichl.net/2020/07/14/telegraf-influxdb-grafana-on-raspberrypi-from-scratch/)
 
 1. Install the influxdb and grafana repository keys (ignore the warning about `apt-key add` being deprecated):
 
@@ -59,7 +59,6 @@ sudo systemctl unmask telegraf
 sudo systemctl enable telegraf
 sudo systemctl enable grafana-server
 ```
-
 
 1. Start InfluxDB
 
